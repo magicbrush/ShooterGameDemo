@@ -1,6 +1,7 @@
 # ShooterGameDemo
 A demonstrative shooter game
 
+![image](https://github.com/magicbrush/ShooterGameDemo/blob/master/document/snapshot.jpg)
 
 // for my students:
 方式一： 
@@ -14,4 +15,4 @@ A demonstrative shooter game
 3.将下载中的data.zip中的内容解压到bin/data下
 4.编译运行工程
 
-![image](https://github.com/magicbrush/ShooterGameDemo/new/master/document/snapshot.jpg)
+
