@@ -12,7 +12,6 @@ A demonstrative shooter game
 0.下载全部代码和资源
 1.用ProjectGenerator建立一个新的of工程
 2.将src中的代码替换为下载的代码
-3.将下载中的data.zip中的内容解压到bin/data下
+3.将下载中的data.zip中的内容解压到: (工程根目录)/bin/data下
 4.编译运行工程
-
 
