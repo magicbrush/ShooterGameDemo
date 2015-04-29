@@ -10,8 +10,9 @@ A demonstrative shooter game
 
 方式二：
 0.下载全部代码和资源
-1.用ProjectGenerator建立一个新的of工程
-2.将src中的代码替换为下载的代码
-3.将下载中的data.zip中的内容解压到: (工程根目录)/bin/data下
-4.编译运行工程
+1.用openFrameworks框架的ProjectGenerator建立一个新的of工程
+2.将新工程中src目录下的代码替换为下载的代码
+3.将所有代码加入该工程中
+4.将下载中的data.zip中的内容解压到: (工程根目录)/bin/data下
+5.编译运行工程
 
