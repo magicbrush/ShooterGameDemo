@@ -48,18 +48,21 @@ void ofApp::update(){
 	
 	// 如果处于运行状态，则更新所有内容
 	if(Running)
-	{				
+	{			
+		// 随机添加敌人
+		randGenerateEnemy();
+
 		// 玩家行动
 		updatePlayer();		
 
-		// 随机添加敌人
-		randGenerateEnemy();
+		// 子弹行动
+		updateBullets();
 
 		// 敌人行动
 		updateEnemies();
 
-		// 子弹行动
-		updateBullets();
+		// 死亡判断
+		updateLifeStates();
 
 		// 计时
 		time += ofGetLastFrameTime();
@@ -304,52 +307,7 @@ void ofApp::updateEnemies()
 	for(int i=0;i<numE;i++)
 	{
 		// 更新
-		Enemys[i]->update();
-
-		// 是否出界
-		ofPoint P = Enemys[i]->getPosition();
-		if(!RLevel.inside(P))
-		{
-			delete Enemys[i];// 6.3 动态内存分配
-			Enemys[i] =NULL;
-			continue;
-		}			
-
-		//　是否挨子弹
-		ofRectangle RectEnemy = Enemys[i]->getRect();	
-		int numB = Bullets.size();
-		for(int j=0;j<numB;j++)
-		{
-			if(Bullets[j]==NULL)
-			{
-				continue;
-			}
-			ofPoint PBullet = Bullets[j]->getPosition();
-			if(RectEnemy.inside(PBullet))// 中弹
-			{
-				// 删除敌人和子弹
-				score += Enemys[i]->getScore();
-				delete Enemys[i]; // 6.3 动态内存分配
-				Enemys[i] =NULL;
-				delete Bullets[j];// 6.3 动态内存分配
-				Bullets[j] = NULL;
-
-				// 死亡音效
-				// 以不同的大小、速度播放，实现每个怪物不同喊声
-				SoundMonsterDie.setVolume(ofRandom(0.4f,0.8f));
-				SoundMonsterDie.setSpeed(ofRandom(0.5f,1.5f));
-				SoundMonsterDie.play();
-			}
-		}
-
-		// 是否抓住玩家
-		if(RectPlayer.intersects(RectEnemy))
-		{
-			// 游戏结束
-			Running = false;
-			// 惨叫
-			SoundDie.play();
-		}			
+		Enemys[i]->update();			
 	}
 }
 
@@ -367,37 +325,17 @@ void ofApp::updateBullets()
 		Bullets[i]->update();
 		// 子弹减速
 		Bullets[i]->resist(0.98);
-		if(Bullets[i]->getVelocity().length()<0.33f)
-		{
-			// 子弹速度过小，则消失
-			delete Bullets[i];
-			Bullets[i]=NULL;
-		}
 	}
 }
 
 void ofApp::updatePlayer()
-{
-	// 窗口大小
-	float w,h;
-	w = ofGetWidth();
-	h = ofGetHeight();
-	ofRectangle RLevel(0,0,w,h);
-
+{	
 	// 玩家改变速度
 	Player->accelerate(Acc);
 	// 玩家活动
 	Player->update();
 	// 玩家减速
-	Player->resist(0.9);
-	ofRectangle RectPlayer = Player->getRect();
-	//　若超出边界，游戏结束
-	if(!RectPlayer.intersects(RLevel))
-	{			
-		Running = false;
-		// 惨叫
-		SoundDie.play();		
-	}
+	Player->resist(0.9);	
 }
 
 void ofApp::drawLevel()
@@ -437,4 +375,98 @@ void ofApp::PlayerFireBulletTo( int x, int y )
 
 	// 发声
 	SoundBullet.play();
+}
+
+void ofApp::updateLifeStates()
+{
+	//　玩家死亡判断1：若超出边界，游戏结束
+	ofRectangle RectPlayer = Player->getRect();
+	ofRectangle RLevel(0,0,ofGetWidth(),ofGetHeight());
+	if(!RectPlayer.intersects(RLevel))
+	{			
+		Running = false;
+		// 惨叫
+		SoundDie.play();		
+	}
+	//　玩家死亡判断2：被敌人逮着
+	int numE = Enemys.size();
+	for(int i=0;i<numE;i++)
+	{
+		ofRectangle RectEnemy = Enemys[i]->getRect();
+		// 是否抓住玩家
+		if(RectPlayer.intersects(RectEnemy))
+		{
+				// 游戏结束
+				Running = false;
+				// 惨叫
+				SoundDie.play();
+		}					
+	}
+
+	// 敌人和子弹的死亡判断
+	numE = Enemys.size();
+	// 是否出界
+	for(int i=0;i<numE;i++)
+	{
+		ofPoint P = Enemys[i]->getPosition();
+		if(!RLevel.inside(P))
+		{
+			delete Enemys[i];// 6.3 动态内存分配
+			Enemys[i] =NULL;
+			continue;
+		}	
+	}
+	eraseNullSprite(Enemys);
+
+	//　是否挨子弹
+	numE = Enemys.size();
+	for(int i=0;i<Enemys.size();i++)
+	{			
+			ofRectangle RectEnemy = Enemys[i]->getRect();	
+			int numB = Bullets.size();
+			for(int j=0;j<numB;j++)
+			{
+				if(Bullets[j]==NULL)
+				{
+					continue;
+				}
+				ofPoint PBullet = Bullets[j]->getPosition();
+				if(RectEnemy.inside(PBullet)&&Enemys[i]!=NULL)// 中弹
+				{
+					// 删除敌人和子弹
+					score += Enemys[i]->getScore();
+					delete Enemys[i]; // 6.3 动态内存分配
+					Enemys[i] =NULL;
+					Bullets[j]->setVelocity(ofVec2f(0));					
+
+					// 死亡音效
+					// 以不同的大小、速度播放，实现每个怪物不同喊声
+					SoundMonsterDie.setVolume(ofRandom(0.4f,0.8f));
+					SoundMonsterDie.setSpeed(ofRandom(0.5f,1.5f));
+					SoundMonsterDie.play();
+				}
+			}			
+	}		
+	eraseNullSprite(Enemys);	
+
+	// 子弹死亡判断
+	int numB = Bullets.size();
+	for(int i=0;i<numB;i++)
+	{
+		if(Bullets[i]==NULL)
+		{
+			continue;
+		}
+		
+		if(Bullets[i]->getVelocity().length()<0.33f)
+		{
+			// 子弹速度过小，则消失
+			delete Bullets[i];
+			Bullets[i]=NULL;
+		}
+	}
+	eraseNullSprite(Bullets);
+
+	
+
 }

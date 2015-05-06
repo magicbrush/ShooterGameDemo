@@ -102,12 +102,16 @@ class ofApp :
 		void updateEnemies( );
 		// 子弹行动
 		void updateBullets();
+		// 更新生命状态
+		void updateLifeStates();
 
 		// 显示场景
 		void drawLevel();
 
 		// 玩家发射子弹到x,y
 		void PlayerFireBulletTo( int x, int y );
+		
+		
 
 
 		
